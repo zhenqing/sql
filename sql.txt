@@ -1,0 +1,54 @@
+insert into pricebackup select * from pricehistory;
+
+drop table textbook_avg;
+create table textbook_avg
+select p.`isbn` as isbn,avg(p.`aprice`) as avg_aprice,avg(p.`tnlprice`) as avg_tnlprice,
+avg(p.`tulprice`) as avg_tulprice
+ from `pricebackup` p where p.`flag`="T"
+ group by p.`isbn`;
+
+select p.isbn as isbn,p.`aprice` as aprice,b.`avg_aprice` as avg_aprice from pricehistory p, 
+textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_aprice`*0.85- p.`aprice`>15.35;
+
+select distinct * from (
+select p.isbn as isbn,p.`tnlprice` as tnlprice,b.`avg_tnlprice` as avg_tnlprice from pricehistory p, textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_tnlprice`*0.85- p.`tnlprice`>15.35) s;
+
+
+select p.isbn as isbn,p.`tulprice` as tulprice,b.`avg_tulprice` as avg_tulprice from pricehistory p, textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_tulprice`*0.85- p.`tulprice`>15.35;
+
+
+CREATE TABLE `textbook_good` (
+  `isbn` varchar(10) NOT NULL,
+  `aprice` double DEFAULT NULL,
+  `avg_aprice` double DEFAULT NULL,
+  `tnlprice` double DEFAULT NULL,
+  `avg_tnlprice` double DEFAULT NULL,
+  `tulprice` double DEFAULT NULL,
+  `avg_tulprice` double DEFAULT NULL
+) 
+truncate table textbook_good_tmp;
+insert into  `textbook_good_tmp` (isbn,aprice,avg_aprice) 
+(select p.isbn as isbn,p.`aprice` as aprice,b.`avg_aprice` as avg_aprice from pricehistory p, textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_aprice`*0.85- p.`aprice`>15.35);
+insert into  `textbook_good_tmp` (isbn,tnlprice,avg_tnlprice) 
+(select p.isbn as isbn,p.`tnlprice` as tnlprice,b.`avg_tnlprice` as avg_tnlprice from pricehistory p, textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_tnlprice`*0.85- p.`tnlprice`>15.35);
+insert into  `textbook_good_tmp` (isbn,tulprice,avg_tulprice) 
+(select p.isbn as isbn,p.`tulprice` as tulprice,b.`avg_tulprice` as avg_tulprice from pricehistory p, textbook_avg b
+where p.`isbn`=b.`isbn`
+and b.`avg_tulprice`*0.85- p.`tulprice`>15.35);
+
+insert into textbook_good(isbn,aprice,avg_aprice,tnlprice,avg_tnlprice,tulprice,avg_tulprice)
+select isbn,sum(aprice),sum(avg_aprice),sum(tnlprice),sum(avg_tnlprice),sum(tulprice),sum(avg_tulprice)
+from textbook_good_tmp
+group by isbn;
+
+select * from pricebackup where isbn in (select distinct isbn from textbook_good);

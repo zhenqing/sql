@@ -1,0 +1,22 @@
+CREATE TABLE `topbooks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `isbn` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `summit` (
+  `isbn` varchar(10) NOT NULL,
+  `tulprice` double NOT NULL,
+  `tulprice2` double NOT NULL,
+  `tnlprice` double NOT NULL,
+  `time` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE topbooks2 disable KEYS;
+
+update topbooks set isbn=lpad(isbn,10,0);
+SELECT * 
+FROM  `topbooks` 
+WHERE LOCATE(  'no', isbn ) ;
